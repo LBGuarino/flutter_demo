@@ -262,72 +262,105 @@
 //     throw 'Could not launch $url';
 //   }
 // }
+// import 'package:flutter/material.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// void main() {
+//   runApp(const MyApp());
+// }
+
+// class MyApp extends StatefulWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   _MyAppState createState() => _MyAppState();
+// }
+
+// class _MyAppState extends State<MyApp> {
+//   TextEditingController _controller = TextEditingController();
+//   String _storedValue = '';
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Flutter Plugin Lab',
+//       home: Scaffold(
+//         appBar: AppBar(title: const Text('Explore Plugins in Flutter')),
+//         body: Padding(
+//           padding: const EdgeInsets.all(16.0),
+//           child: Column(
+//             children: [
+//               TextField(
+//                 controller: _controller,
+//                 decoration: const InputDecoration(labelText: 'Enter some text'),
+//               ),
+//               const SizedBox(
+//                 height: 16,
+//               ), // Adds space between TextField and Save button
+//               ElevatedButton(
+//                 onPressed: _saveData,
+//                 child: const Text('Save Data'),
+//               ),
+//               const SizedBox(
+//                 height: 16,
+//               ), // Adds space between Save and Load button
+//               ElevatedButton(
+//                 onPressed: _loadData,
+//                 child: const Text('Load Data'),
+//               ),
+//               const SizedBox(
+//                 height: 16,
+//               ), // Adds space between Load button and Text
+//               Text('Stored Value: $_storedValue'),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+
+//   void _saveData() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     await prefs.setString('myKey', _controller.text);
+//   }
+
+//   void _loadData() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     setState(() {
+//       _storedValue = prefs.getString('myKey') ?? 'No Data';
+//     });
+//   }
+// }
+
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:localstorage/localstorage.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'home_screen.dart';
+import 'student_provider.dart';
+
+late final ValueNotifier<int> notifier;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initLocalStorage();
+  runApp(MyApp(localStorage: localStorage));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  final LocalStorage localStorage;
 
-  @override
-  _MyAppState createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  TextEditingController _controller = TextEditingController();
-  String _storedValue = '';
+  const MyApp({Key? key, required this.localStorage}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Plugin Lab',
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Explore Plugins in Flutter')),
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _controller,
-                decoration: const InputDecoration(labelText: 'Enter some text'),
-              ),
-              const SizedBox(
-                height: 16,
-              ), // Adds space between TextField and Save button
-              ElevatedButton(
-                onPressed: _saveData,
-                child: const Text('Save Data'),
-              ),
-              const SizedBox(
-                height: 16,
-              ), // Adds space between Save and Load button
-              ElevatedButton(
-                onPressed: _loadData,
-                child: const Text('Load Data'),
-              ),
-              const SizedBox(
-                height: 16,
-              ), // Adds space between Load button and Text
-              Text('Stored Value: $_storedValue'),
-            ],
-          ),
-        ),
+    // Wrap the MaterialApp with the ChangeNotifierProvider
+    return ChangeNotifierProvider<StudentProvider>(
+      create: (_) => StudentProvider(storage: localStorage),
+      child: MaterialApp(
+        title: 'Student Management App',
+        home: HomeScreen(), // Assuming HomeScreen leads to EditStudentScreen
       ),
     );
-  }
-
-  void _saveData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('myKey', _controller.text);
-  }
-
-  void _loadData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _storedValue = prefs.getString('myKey') ?? 'No Data';
-    });
   }
 }
